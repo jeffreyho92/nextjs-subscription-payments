@@ -8,9 +8,9 @@
   box-sizing: inherit;
 }
 
-*:focus {
+/* *:focus {
   @apply outline-none ring-2 ring-pink-500 ring-opacity-50;
-}
+} */
 
 html {
   height: 100%;
@@ -49,4 +49,26 @@ a {
 
 .height-screen-helper {
   height: calc(100vh - 80px);
+}
+
+/* .btn {
+  @apply font-bold py-2 px-4 rounded w-fit;
+}
+.btn-blue {
+  @apply bg-blue-500 text-white;
+}
+.btn-blue:hover {
+  @apply bg-blue-700;
+} */
+
+
+
+.react-scroll-to-bottom--css-uzqrz-79elbk {
+  position: relative;
+}
+
+.react-scroll-to-bottom--css-ikyem-1n7m0yu {
+  height: 100%;
+  overflow-y: auto;
+  width: 100%;
 }

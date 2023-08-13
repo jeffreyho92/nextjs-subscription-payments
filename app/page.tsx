@@ -1,3 +1,4 @@
+import PublicLayout from '@/app/(public)/layout';
 import Pricing from '@/components/Pricing';
 import {
   getSession,
@@ -13,11 +14,13 @@ export default async function PricingPage() {
   ]);
 
   return (
-    <Pricing
-      session={session}
-      user={session?.user}
-      products={products}
-      subscription={subscription}
-    />
+    <PublicLayout>
+        <Pricing
+          session={session}
+          user={session?.user}
+          products={products}
+          subscription={subscription}
+        />
+    </PublicLayout>
   );
 }

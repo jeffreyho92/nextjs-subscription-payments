@@ -11,6 +11,8 @@
     "generate-types": "npx supabase gen types typescript --project-id YOUR_PROJECT_ID --schema public > types_db.ts"
   },
   "dependencies": {
+    "@react-pdf-viewer/core": "^3.12.0",
+    "@react-pdf-viewer/default-layout": "^3.12.0",
     "@stripe/stripe-js": "^1.53.0",
     "@supabase/auth-helpers-nextjs": "^0.7.0",
     "@supabase/auth-ui-react": "^0.4.2",
@@ -18,9 +20,14 @@
     "@supabase/supabase-js": "^2.23.0",
     "classnames": "^2.3.2",
     "next": "13.4.3",
+    "pdfjs-dist": "^3.9.179",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-dropzone": "^14.2.3",
+    "react-icons": "^4.10.1",
     "react-merge-refs": "^2.0.2",
+    "react-resizable-panels": "^0.0.54",
+    "react-select": "^5.7.4",
     "stripe": "^12.6.0",
     "tailwindcss": "^3.3.2"
   },
@@ -29,6 +36,7 @@
     "@types/node": "^20.2.3",
     "@types/react": "^18.2.7",
     "autoprefixer": "^10.4.14",
+    "encoding": "^0.1.13",
     "eslint": "^8.41.0",
     "eslint-config-next": "13.4.3",
     "eslint-config-prettier": "^8.8.0",

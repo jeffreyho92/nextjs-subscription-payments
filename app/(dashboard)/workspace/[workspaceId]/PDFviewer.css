@@ -1,0 +1,4 @@
+/* hide "More actions" button  */
+.rpv-toolbar__right{
+    display: none;
+}
