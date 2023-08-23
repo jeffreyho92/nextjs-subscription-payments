@@ -7,7 +7,8 @@ import { RxHamburgerMenu } from "react-icons/rx";
 // import useAnalytics from "@/hooks/useAnalytics";
 import useAutoResizeTextArea from "@/hooks/useAutoResizeTextArea";
 import Message from "./Message";
-import { DEFAULT_OPENAI_MODEL } from "@/shared/Constants";
+// import { DEFAULT_OPENAI_MODEL } from "@/shared/Constants";
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 
 const Chat = (props: any) => {
   // const { toggleComponentVisibility } = props;
@@ -16,12 +17,13 @@ const Chat = (props: any) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [showEmptyChat, setShowEmptyChat] = useState(true);
   const [conversation, setConversation] = useState<any[]>([]);
+  // const [conversationStream, setConversationStream] = useState("");
   const [message, setMessage] = useState("");
 //   const { trackEvent } = useAnalytics();
   const textAreaRef = useAutoResizeTextArea();
   const bottomOfChatRef = useRef<HTMLDivElement>(null);
 
-  const selectedModel = DEFAULT_OPENAI_MODEL;
+  // const selectedModel = DEFAULT_OPENAI_MODEL;
 
   useEffect(() => {
     if (textAreaRef.current) {
@@ -62,29 +64,65 @@ const Chat = (props: any) => {
     setShowEmptyChat(false);
 
     try {
-      const response = await fetch(`/api/openai`, {
+      const streaming = (EventSource) ? true : false;
+      const url = `/api/ask-question`;
+      const fetchObj = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          messages: [...conversation, { content: message, role: "user" }],
-          model: selectedModel,
+          question: message, streaming
         }),
-      });
+      };
 
-      if (response.ok) {
-        const data = await response.json();
-
-        // Add the message to the conversation
-        setConversation([
-          ...conversation,
-          { content: message, role: "user" },
-          { content: data.message, role: "system" },
-        ]);
-      } else {
-        console.error(response);
-        setErrorMessage(response.statusText);
+      console.log('streaming', streaming)
+      if(streaming){
+        let response = "";
+        await fetchEventSource(url, {
+          ...fetchObj,
+          onmessage(ev) {
+            // console.log(ev.data);
+            response += ev.data;
+            // console.log('response', response)
+            // setConversationStream(response);
+            // Add the message to the conversation
+            setConversation([
+              ...conversation,
+              { content: message, role: "user" },
+              { content: response, role: "system" },
+            ]);
+          },
+          // onclose() {
+          //   console.log("Connection Closed by the Server");
+          // },
+          onerror(err) {
+            if (err) {
+              console.log('fetchEventSource', err);
+            }
+            throw err; // rethrow to stop the operation
+          }
+        });
+      }else{
+        const response = await fetch(url, {
+          ...fetchObj
+        });
+  
+        if (response.ok) {
+          const data = await response.json();
+          // console.log('data', data);
+          if(data?.response?.text){
+            // Add the message to the conversation
+            setConversation([
+              ...conversation,
+              { content: message, role: "user" },
+              { content: data?.response?.text, role: "system" },
+            ]);
+          }
+        } else {
+          console.error(response);
+          setErrorMessage(response.statusText);
+        }
       }
 
       setIsLoading(false);
@@ -135,6 +173,9 @@ const Chat = (props: any) => {
                   {conversation.map((message, index) => (
                     <Message key={index} message={message} />
                   ))}
+                  {/* {
+                    conversationStream && <Message key={'streamMessage'} message={{ content: conversationStream, role: "system" }} />
+                  } */}
                   <div className="w-full h-32 md:h-48 flex-shrink-0"></div>
                   <div ref={bottomOfChatRef}></div>
                 </div>
@@ -201,10 +242,11 @@ const Chat = (props: any) => {
                     overflowY: "hidden",
                   }}
                   // rows={1}
-                  placeholder="Send a message..."
+                  placeholder={(isLoading)? "AI is thinking..." : "Send a message..."}
                   className="m-0 w-full resize-none border-0 bg-transparent p-0 pr-7 focus:ring-0 focus-visible:ring-0 dark:bg-transparent pl-2 md:pl-0 outline-0	text-black"
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={handleKeypress}
+                  disabled={isLoading}
                 ></textarea>
                 <button
                   disabled={isLoading || message?.length === 0}
@@ -220,7 +262,7 @@ const Chat = (props: any) => {
             <span>
               {/* ChatGPT Clone may produce inaccurate information about people,
               places, or facts. */}
-              Powered by OpenAI
+              Powered by OpenAI.
             </span>
           </div>
         </div>

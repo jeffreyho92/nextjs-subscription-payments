@@ -11,6 +11,7 @@
     "generate-types": "npx supabase gen types typescript --project-id YOUR_PROJECT_ID --schema public > types_db.ts"
   },
   "dependencies": {
+    "@microsoft/fetch-event-source": "^2.0.1",
     "@react-pdf-viewer/core": "^3.12.0",
     "@react-pdf-viewer/default-layout": "^3.12.0",
     "@stripe/stripe-js": "^1.53.0",
@@ -19,6 +20,9 @@
     "@supabase/auth-ui-shared": "^0.1.6",
     "@supabase/supabase-js": "^2.23.0",
     "classnames": "^2.3.2",
+    "common-tags": "^1.8.2",
+    "gpt3-tokenizer": "^1.1.5",
+    "langchain": "^0.0.128",
     "next": "13.4.3",
     "pdfjs-dist": "^3.9.179",
     "react": "^18.2.0",
@@ -33,6 +37,7 @@
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^3.7.2",
+    "@types/common-tags": "^1.8.1",
     "@types/node": "^20.2.3",
     "@types/react": "^18.2.7",
     "autoprefixer": "^10.4.14",
