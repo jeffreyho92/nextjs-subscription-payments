@@ -12,14 +12,13 @@ import { OpenAIModerationChain, LLMChain } from "langchain/chains";
 import { ChatPromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate } from "langchain/prompts";
 import { OpenAI } from "langchain/llms/openai";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
-import { SupabaseHybridSearch } from "langchain/retrievers/supabase";
+import { SupabaseHybridSearch,  } from "langchain/retrievers/supabase";
+import {
+  SupabaseFilterRPCCall,
+  SupabaseVectorStore,
+} from "langchain/vectorstores/supabase";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { CallbackManager } from "langchain/callbacks";
-
-// import scrape from '@/scripts/scrape-embed';
-// console.log('scrape-embed run 1')
-// scrape();
-// console.log('scrape-embed run 2')
 
 const modelNameChat = "gpt-3.5-turbo";
 const modelNameEmbedding = "text-embedding-ada-002";
@@ -52,13 +51,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: checkModerationResult }, { status: 400 });
   }
 
+  // const metadata = {"undefined":"this is wrong"};
+  const metadata = {
+    "loc": {
+      "lines": {
+        "to": 3,
+        "from": 3
+      }
+    },
+    "file_id": "11d80e53-7d0c-4b72-97f7-6670acf1664e"
+  };
+  // const metadata = {"file_id":"d1848e4e-0da3-4c9e-bf76-e1cef882e72e"};
   let contextText = "";
-  const arrRelevant = await findRelevantDocuments(question);
+  const arrRelevant = await findRelevantDocuments(question, metadata);
   // const arrRelevant = [<Document>{
   //   pageContent: 'work? A2: It uses a lot of text it learned from the internet to understand and generate human-like conversations. Q3: Can ChatGPT understand different topics? A3: Yes, it can chat about many topics',
   //   // metadata: { loc: [Object] }
   // }];
-  // console.log(arrRelevant);
+  console.log(arrRelevant);
   if(arrRelevant.length > 0){
     contextText = generateContext(arrRelevant);
   }
@@ -226,18 +236,52 @@ const generateContext = (arrRelevant: Document[]): string => {
   return contextText;
 }
 
-const findRelevantDocuments = async (question: string): Promise<Document[]> => {
+const findRelevantDocuments = async (question: string, metadata: Record<string, unknown>): Promise<Document[]> => {
+
+  // const filter = {
+  //   "loc": {
+  //     "lines": {
+  //       "to": 3,
+  //       "from": 3
+  //     }
+  //   },
+  //   "file_id": "11d80e53-7d0c-4b72-97f7-6670acf1664e"
+  // };
+  // metadata = filter
+  // metadata = {"file_id": "empty"}
+  console.log('metadata', metadata)
   const embeddings = new OpenAIEmbeddings({modelName: modelNameEmbedding});
-  const retriever = new SupabaseHybridSearch(embeddings, {
+  // const retriever = new SupabaseHybridSearch(embeddings, {
+  //   client: supabaseClient,
+  //   //  Below are the defaults, expecting that you set up your supabase table and functions according to the guide above. Please change if necessary.
+  //   similarityK: 2,
+  //   keywordK: 2,
+  //   tableName: "documents",
+  //   similarityQueryName: "match_documents",
+  //   // keywordQueryName: "kw_match_documents",
+  //   metadata,
+  // });
+  // const results = await retriever.getRelevantDocuments(question);
+
+  const vectorStore = new SupabaseVectorStore(embeddings, {
     client: supabaseClient,
-    //  Below are the defaults, expecting that you set up your supabase table and functions according to the guide above. Please change if necessary.
-    similarityK: 2,
-    keywordK: 2,
     tableName: "documents",
-    similarityQueryName: "match_documents",
-    keywordQueryName: "kw_match_documents",
+    filter: metadata,
   });
-  const results = await retriever.getRelevantDocuments(question);
+  const match_count = 2;
+  const results = await vectorStore.similaritySearch(question, match_count);
+//   const filter = { genre: "science fiction" };
+// const results = await retriever.getRelevantDocuments("hello bye", { metadata: {filter} });
+
+  // const funcFilterA: SupabaseFilterRPCCall = (rpc) =>
+  // rpc
+  //   .filter("metadata->b::int", "lt", 3)
+  //   .filter("metadata->c::int", "gt", 7)
+  //   .textSearch("content", `'multidimensional' & 'spaces'`, {
+  //     config: "english",
+  //   });
+
+  // const results = await retriever.similaritySearch("quantum", 4, funcFilterA);
   return results;
 }
 
