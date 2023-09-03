@@ -72,10 +72,13 @@ const Chat = (props: any) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          question: message, streaming
+          question: message, 
+          workspace_id: props.workspaceId,
+          streaming
         }),
       };
 
+      console.log('props.workspaceId', props.workspaceId)
       console.log('streaming', streaming)
       if(streaming){
         let response = "";
@@ -251,7 +254,7 @@ const Chat = (props: any) => {
                 <button
                   disabled={isLoading || message?.length === 0}
                   onClick={sendMessage}
-                  className="absolute p-1 rounded-md bottom-1.5 md:bottom-2.5 bg-transparent disabled:bg-gray-500 right-1 md:right-2 disabled:opacity-40"
+                  className="absolute p-1 rounded-md bottom-1.5 md:bottom-2.5 bg-gray-500 right-1 md:right-2 disabled:opacity-40"
                 >
                   <FiSend className="h-4 w-4 mr-1 text-white " />
                 </button>
@@ -262,7 +265,7 @@ const Chat = (props: any) => {
             <span>
               {/* ChatGPT Clone may produce inaccurate information about people,
               places, or facts. */}
-              Powered by OpenAI.
+              Powered by AI
             </span>
           </div>
         </div>

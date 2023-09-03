@@ -31,6 +31,88 @@ export interface Database {
           }
         ]
       }
+      documents: {
+        Row: {
+          content: string | null
+          embedding: string | null
+          id: number
+          metadata: Json | null
+        }
+        Insert: {
+          content?: string | null
+          embedding?: string | null
+          id?: number
+          metadata?: Json | null
+        }
+        Update: {
+          content?: string | null
+          embedding?: string | null
+          id?: number
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
+      files: {
+        Row: {
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          deleted_by: string | null
+          filename: string
+          id: string
+          updated_at: string | null
+          updated_by: string | null
+          "word workspace_id": string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          filename: string
+          id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          "word workspace_id": string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          filename?: string
+          id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          "word workspace_id"?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "files_created_by_fkey"
+            columns: ["created_by"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_deleted_by_fkey"
+            columns: ["deleted_by"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_updated_by_fkey"
+            columns: ["updated_by"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "files_word workspace_id_fkey"
+            columns: ["word workspace_id"]
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       prices: {
         Row: {
           active: boolean | null
@@ -205,12 +287,156 @@ export interface Database {
           }
         ]
       }
+      workspaces: {
+        Row: {
+          created_at: string
+          created_by: string
+          deleted_at: string | null
+          deleted_by: string | null
+          id: string
+          updated_at: string | null
+          updated_by: string | null
+          workspace_name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          workspace_name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          deleted_at?: string | null
+          deleted_by?: string | null
+          id?: string
+          updated_at?: string | null
+          updated_by?: string | null
+          workspace_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspaces_created_by_fkey"
+            columns: ["created_by"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspaces_deleted_by_fkey"
+            columns: ["deleted_by"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspaces_updated_by_fkey"
+            columns: ["updated_by"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      ivfflathandler: {
+        Args: {
+          "": unknown
+        }
+        Returns: unknown
+      }
+      kw_match_documents: {
+        Args: {
+          query_text: string
+          match_count: number
+          filter?: Json
+        }
+        Returns: {
+          id: number
+          content: string
+          metadata: Json
+          similarity: number
+        }[]
+      }
+      kw_match_documents2: {
+        Args: {
+          query_text: string
+          match_count: number
+          filter?: Json
+        }
+        Returns: {
+          id: number
+          content: string
+          metadata: Json
+          similarity: number
+        }[]
+      }
+      match_documents: {
+        Args: {
+          query_embedding: string
+          match_count?: number
+          filter?: Json
+        }
+        Returns: {
+          id: number
+          content: string
+          metadata: Json
+          similarity: number
+        }[]
+      }
+      match_documents2: {
+        Args: {
+          query_embedding: string
+          match_count: number
+        }
+        Returns: {
+          id: number
+          content: string
+          metadata: Json
+          similarity: number
+        }[]
+      }
+      vector_avg: {
+        Args: {
+          "": number[]
+        }
+        Returns: string
+      }
+      vector_dims: {
+        Args: {
+          "": string
+        }
+        Returns: number
+      }
+      vector_norm: {
+        Args: {
+          "": string
+        }
+        Returns: number
+      }
+      vector_out: {
+        Args: {
+          "": string
+        }
+        Returns: unknown
+      }
+      vector_send: {
+        Args: {
+          "": string
+        }
+        Returns: string
+      }
+      vector_typmod_in: {
+        Args: {
+          "": unknown[]
+        }
+        Returns: number
+      }
     }
     Enums: {
       pricing_plan_interval: "day" | "week" | "month" | "year"

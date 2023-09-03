@@ -30,15 +30,21 @@ const defaultAIMessage = "Sorry, I don't know how to help with that.";
 export async function POST(req: NextRequest) {
   const body = await req.json();
 
+  const { data, error } = await supabaseClient.storage.from('workspaces').download('f4c812ac-5af5-411e-9ec2-4c80b202cddc/11d80e53-7d0c-4b72-97f7-6670acf1664e')
+  console.log('data', data);
+  console.log('error', error);
+
   let question = body?.question;
+  let workspace_id = body?.workspace_id;
   console.log('question', question)
-  if(!question){
-    return NextResponse.json({ success: false, error: "question cannot be empty" }, { status: 400 });
+  if(!question || !workspace_id){
+    return NextResponse.json({ success: false, error: "params missing" }, { status: 400 });
   }else{
     // OpenAI recommends replacing newlines with spaces for best results
     question = question.replace(/\n/g, ' ');
   }
 
+  workspace_id = "f4c812ac-5af5-411e-9ec2-4c80b202cddc";
   question = "ChatGPT understand different topics";
   // question = "I will kill you ";
   question = question.trim();
@@ -51,19 +57,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: checkModerationResult }, { status: 400 });
   }
 
-  // const metadata = {"undefined":"this is wrong"};
-  const metadata = {
-    "loc": {
-      "lines": {
-        "to": 3,
-        "from": 3
-      }
-    },
-    "file_id": "11d80e53-7d0c-4b72-97f7-6670acf1664e"
-  };
+  //get file_id from workspace_id
+  var files = await getFilesByWorkspace_id(workspace_id);
+  console.log('files', files)
   // const metadata = {"file_id":"d1848e4e-0da3-4c9e-bf76-e1cef882e72e"};
+  // const files = ["d1848e4e-0da3-4c9e-bf76-e1cef882e72e", "11d80e53-7d0c-4b72-97f7-6670acf1664e"];
   let contextText = "";
-  const arrRelevant = await findRelevantDocuments(question, metadata);
+  const arrRelevant = await findRelevantDocuments(question, files);
   // const arrRelevant = [<Document>{
   //   pageContent: 'work? A2: It uses a lot of text it learned from the internet to understand and generate human-like conversations. Q3: Can ChatGPT understand different topics? A3: Yes, it can chat about many topics',
   //   // metadata: { loc: [Object] }
@@ -236,20 +236,7 @@ const generateContext = (arrRelevant: Document[]): string => {
   return contextText;
 }
 
-const findRelevantDocuments = async (question: string, metadata: Record<string, unknown>): Promise<Document[]> => {
-
-  // const filter = {
-  //   "loc": {
-  //     "lines": {
-  //       "to": 3,
-  //       "from": 3
-  //     }
-  //   },
-  //   "file_id": "11d80e53-7d0c-4b72-97f7-6670acf1664e"
-  // };
-  // metadata = filter
-  // metadata = {"file_id": "empty"}
-  console.log('metadata', metadata)
+const findRelevantDocuments = async (question: string, files: string[]): Promise<Document[]> => {
   const embeddings = new OpenAIEmbeddings({modelName: modelNameEmbedding});
   // const retriever = new SupabaseHybridSearch(embeddings, {
   //   client: supabaseClient,
@@ -263,15 +250,22 @@ const findRelevantDocuments = async (question: string, metadata: Record<string, 
   // });
   // const results = await retriever.getRelevantDocuments(question);
 
+  let filterFile = files.join('","');
+  filterFile = `("${filterFile}")`;
+  console.log('filterFile', filterFile)
+
+  const funcFilter: SupabaseFilterRPCCall = (rpc) =>
+  rpc
+    // .filter("metadata->>file_id", "eq", '("11d80e53-7d0c-4b72-97f7-6670acf1664e","d1848e4e-0da3-4c9e-bf76-e1cef882e72e")');
+    .filter("metadata->>file_id", "in", filterFile);
   const vectorStore = new SupabaseVectorStore(embeddings, {
     client: supabaseClient,
     tableName: "documents",
-    filter: metadata,
+    // filter: metadata,
+    filter: funcFilter,
   });
   const match_count = 2;
   const results = await vectorStore.similaritySearch(question, match_count);
-//   const filter = { genre: "science fiction" };
-// const results = await retriever.getRelevantDocuments("hello bye", { metadata: {filter} });
 
   // const funcFilterA: SupabaseFilterRPCCall = (rpc) =>
   // rpc
@@ -282,7 +276,27 @@ const findRelevantDocuments = async (question: string, metadata: Record<string, 
   //   });
 
   // const results = await retriever.similaritySearch("quantum", 4, funcFilterA);
+
   return results;
+}
+
+// type File = Database['public']['Tables']['files']['Row'];
+const getFilesByWorkspace_id = async (workspace_id: string): Promise<string[]> => {
+  console.log('workspace_id', workspace_id)
+  let { data: files, error } = await supabaseClient
+  .from('files')
+  .select('id')
+  .eq('workspace_id', workspace_id)
+  .is('deleted_at', null);
+
+  if(error) console.log('error', error);
+
+  var result = [];
+  if(files){
+    result = files.map((item)=> {  return item.id; });
+  }
+
+  return result;
 }
 
 const checkModeration = async (text: string): Promise<string> => {

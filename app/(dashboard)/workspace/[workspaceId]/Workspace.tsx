@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DragNDrop from './DragNDrop';
 import Spinner from '@/components/ui/Spinner';
 import Chat from "../Chat";
 import dynamic from "next/dynamic";
-import { FaGear } from "react-icons/fa6";
+import { FaGear, FaDownload } from "react-icons/fa6";
 import Select, { SingleValue } from 'react-select';
 import Link from 'next/link';
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
@@ -21,18 +21,56 @@ type selectOptionType = {
   label: string
 }
 
-var arrFiles:selectOptionType[] = [
-  {value: "File1", label: "File A"}, {value: "File2", label: "File B"}, {value: "File3", label: "File C"}
-];
-
 const Workspace = (props: any) => {
   const [data, setData] = useState<object | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(arrFiles[0]);
+  const [loading, setLoading] = useState(true);
+  const [arrFiles, setArrFiles] = useState<selectOptionType[]>([]);
+  const [selectedFile, setSelectedFile] = useState<SingleValue<selectOptionType>>(null);
+  const [selectedFileUrl, setSelectedFileUrl] = useState("/dummy.pdf");
+
+  var workspace_id = props.workspaceId;
+  workspace_id = 'f4c812ac-5af5-411e-9ec2-4c80b202cddc';
+
+  useEffect(() => {
+    initial();
+  }, []);
 
   var handleFileChange = (option: SingleValue<selectOptionType>) => {
-    var selected = { value: option?.value || '', label: option?.label || '' };
+    if(!option?.value) return;
+
+    var selected = { value: option.value || '', label: option.label || '' };
     setSelectedFile(selected);
+    setSelectedFileUrl(generateFileUrl(option.value));
+  };
+
+  const initial = async () => {
+    setLoading(true);
+
+    //get list of files by workspace_id
+    const response = await fetch("http://localhost:3000/api/workspace/"+workspace_id);
+    const data = await response.json();
+    // setData(data);
+    console.log('data', data)
+    if(!data?.success) return;
+
+    var arr:selectOptionType[] = [];
+    var files = data.response || []
+    for (let i = 0; i < files.length; i++) {
+      arr.push({
+        label: files[i].filename,
+        value: files[i].id,
+      });
+    }
+
+    setLoading(false);
+
+    setArrFiles(arr);
+    setSelectedFile(arr[0]);
+    setSelectedFileUrl(generateFileUrl(arr[0].value));
+  };
+
+  var generateFileUrl = (file_id: string) => {
+    return `http://localhost:3000/api/workspace/${workspace_id}/file/${file_id}`;
   };
 
   const fileLoaded = async (file: any) => {
@@ -75,16 +113,24 @@ const Workspace = (props: any) => {
             </span>
           </Link>
 
-          <Select
-            defaultValue={selectedFile}
-            onChange={handleFileChange}
-            options={arrFiles}
-            styles={{
-              // Fixes the overlapping problem of the component
-              menu: provided => ({ ...provided, zIndex: 9999, color: 'black' })
-            }}
-            className='mb-5'
-          />
+          {
+            selectedFile && 
+            <div className="w-full inline-flex items-center mb-5">
+              <Select
+                defaultValue={selectedFile}
+                onChange={handleFileChange}
+                options={arrFiles}
+                styles={{
+                  // Fixes the overlapping problem of the component
+                  menu: provided => ({ ...provided, zIndex: 9999, color: 'black' })
+                }}
+                className='w-11/12'
+              />
+              <button className="ml-4" onClick={()=> window.open(selectedFileUrl, "_blank")}>
+                <FaDownload />
+              </button>
+            </div>
+          }
           {/* <div className="my-5 bg-zinc-800 rounded-lg p-2 flex flex-col items-center">
             {
               arrFiles.map((item, index)=> {
@@ -104,14 +150,23 @@ const Workspace = (props: any) => {
           </div> */}
           {
             // selectedFile && <PDFviewer pdfURL={selectedFile} />
-            <PDFviewer pdfURL="/dummy.pdf" />
+            <PDFviewer pdfURL={selectedFileUrl} />
+            // <PDFviewer pdfURL="http://localhost:3000/api/workspace/f4c812ac-5af5-411e-9ec2-4c80b202cddc/file/11d80e53-7d0c-4b72-97f7-6670acf1664e" />
           }
+          {loading && (
+            <div className="grid grid-cols-1 mt-4">
+              <div className="m-auto">
+                <Spinner />
+              </div>
+              {/* <p className="p-2 text-gray-500">File loading...</p> */}
+            </div>
+          )}
         </div>
       </Panel>
       <ResizeHandle />
       <Panel defaultSize={50} minSize={40}>
         <div className='flex h-full'>
-          <Chat />
+          <Chat workspaceId={props.workspaceId} />
         </div>
         {/* <Chat toggleComponentVisibility={toggleComponentVisibility} /> */}
         {/* {(loading || data) && (

@@ -1,9 +1,21 @@
 .root {
   /* @apply inline-flex text-center items-center leading-7; */
-  border: 0.8em solid lightgray; /* Light grey */
-  border-top: 0.8em solid #00b2ff; /* Blue */
+  border: 0.3em solid rgb(17 24 39 / var(--tw-bg-opacity));
+  border-top: 0.3em solid #00b2ff;
+  /* border-top: 0.3em solid lightgray; */
   border-radius: 50%;
   width: 4em;
   height: 4em;
   animation: spin 2s linear infinite;
+  -webkit-animation: spin 2s linear infinite;
+}
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
