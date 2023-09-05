@@ -1,11 +1,11 @@
 .root {
   /* @apply inline-flex text-center items-center leading-7; */
-  border: 0.3em solid rgb(17 24 39 / var(--tw-bg-opacity));
-  border-top: 0.3em solid #00b2ff;
+  /* border: 0.3em solid rgb(17 24 39 / var(--tw-bg-opacity)); */
+  /* border-top: 0.3em solid #00b2ff; */
   /* border-top: 0.3em solid lightgray; */
   border-radius: 50%;
-  width: 4em;
-  height: 4em;
+  /* width: 4em;
+  height: 4em; */
   animation: spin 2s linear infinite;
   -webkit-animation: spin 2s linear infinite;
 }

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import DragNDrop from './DragNDrop';
 import Spinner from '@/components/ui/Spinner';
 import Chat from "../Chat";
 import dynamic from "next/dynamic";
@@ -9,12 +8,11 @@ import { FaGear, FaDownload } from "react-icons/fa6";
 import Select, { SingleValue } from 'react-select';
 import Link from 'next/link';
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { generateFileUrl } from '@/utils/helpers';
 
 const PDFviewer = dynamic(() => import("./PDFviewer"), {
   ssr: false,
 });
-
-const uploadFileAPI : string = process.env.REACT_UPLOAD_FILE_API || 'http://localhost:3333/claim/process-claim';
 
 type selectOptionType = {
   value: string,
@@ -40,7 +38,7 @@ const Workspace = (props: any) => {
 
     var selected = { value: option.value || '', label: option.label || '' };
     setSelectedFile(selected);
-    setSelectedFileUrl(generateFileUrl(option.value));
+    setSelectedFileUrl(generateFileUrl(workspace_id, option.value));
   };
 
   const initial = async () => {
@@ -50,7 +48,7 @@ const Workspace = (props: any) => {
     const response = await fetch("http://localhost:3000/api/workspace/"+workspace_id);
     const data = await response.json();
     // setData(data);
-    console.log('data', data)
+    // console.log('data', data)
     if(!data?.success) return;
 
     var arr:selectOptionType[] = [];
@@ -66,39 +64,7 @@ const Workspace = (props: any) => {
 
     setArrFiles(arr);
     setSelectedFile(arr[0]);
-    setSelectedFileUrl(generateFileUrl(arr[0].value));
-  };
-
-  var generateFileUrl = (file_id: string) => {
-    return `http://localhost:3000/api/workspace/${workspace_id}/file/${file_id}`;
-  };
-
-  const fileLoaded = async (file: any) => {
-    console.log('fileLoaded', file);
-    if (!file) {
-      return;
-    }
-
-    // setFile(file);
-    setLoading(true);
-    setData({});
-
-    const data = new FormData();
-    data.append('files', file);
-    const response = await fetch(uploadFileAPI, {
-      method: 'POST',
-      body: data,
-    });
-    if (!response.ok) {
-      console.log('response error', response);
-    }
-    const result = await response.json();
-    console.log('result', result);
-    if(result){
-      setData(result);
-    }
-
-    setLoading(false);
+    setSelectedFileUrl(generateFileUrl(workspace_id, arr[0].value));
   };
 
   return (
@@ -144,9 +110,6 @@ const Workspace = (props: any) => {
                 </div>
               })
             }
-          </div> */}
-          {/* <div style={{ height: '80vh', maxHeight: '40em', margin: 'auto' }} >
-            <DragNDrop fileLoaded={fileLoaded} />
           </div> */}
           {
             // selectedFile && <PDFviewer pdfURL={selectedFile} />

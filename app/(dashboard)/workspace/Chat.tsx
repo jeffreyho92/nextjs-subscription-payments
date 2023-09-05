@@ -9,6 +9,7 @@ import useAutoResizeTextArea from "@/hooks/useAutoResizeTextArea";
 import Message from "./Message";
 // import { DEFAULT_OPENAI_MODEL } from "@/shared/Constants";
 import { fetchEventSource } from '@microsoft/fetch-event-source';
+// import Image from 'next/image';
 
 const Chat = (props: any) => {
   // const { toggleComponentVisibility } = props;
@@ -167,6 +168,13 @@ const Chat = (props: any) => {
             <div className="react-scroll-to-bottom--css-ikyem-1n7m0yu">
               <span className="font-semibold text-center text-gray-200 dark:text-gray-600 flex gap-2 items-center justify-center">
                 Ask AI across all documents
+                {/* <Image
+                  src="/beta-white.png"
+                  width={40}
+                  height={40}
+                  alt="beta"
+                /> */}
+                 <span className="text-xs font-thin">[Beta]</span>
               </span>
               {!showEmptyChat && conversation.length > 0 ? (
                 <div className="flex flex-col items-center text-sm dark:bg-gray-800">

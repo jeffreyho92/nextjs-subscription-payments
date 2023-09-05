@@ -44,3 +44,7 @@ export const toDateTime = (secs: number) => {
   t.setSeconds(secs);
   return t;
 };
+
+export const generateFileUrl = (workspace_id: string, file_id: string) => {
+  return `${getURL()}api/workspace/${workspace_id}/file/${file_id}`;
+};

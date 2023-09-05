@@ -21,7 +21,7 @@ export default function DashboardLayout({ children }: PropsWithChildren) {
       {isComponentVisible ? (
         <MobileSiderbar toggleComponentVisibility={toggleComponentVisibility} />
       ) : null}
-      <div className="dark hidden flex-shrink-0 bg-gray-900 md:flex md:w-[240px] md:flex-col">
+      <div className="dark hidden flex-shrink-0 bg-zinc-900 md:flex md:w-[240px] md:flex-col">
         <div className="flex h-full min-h-0 flex-col ">
           <Sidebar />
         </div>

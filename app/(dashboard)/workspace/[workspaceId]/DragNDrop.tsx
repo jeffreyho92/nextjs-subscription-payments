@@ -10,14 +10,15 @@ const DragNDrop = (props: any) => {
 
   const onDrop = useCallback((acceptedFiles: any) => {
     // Do something with the files
-    console.log(acceptedFiles);
+    // console.log(acceptedFiles);
 
-    setFile(
-      Object.assign(acceptedFiles[0], {
-        preview: URL.createObjectURL(acceptedFiles[0]),
-      })
-    );
-    props.fileLoaded(acceptedFiles[0]);
+    // setFile(
+    //   Object.assign(acceptedFiles[0], {
+    //     preview: URL.createObjectURL(acceptedFiles[0]),
+    //   })
+    // );
+    // props.fileLoaded(acceptedFiles[0]);
+    props.fileLoaded(acceptedFiles);
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -27,9 +28,9 @@ const DragNDrop = (props: any) => {
       // 'image/png': ['.png'],
       'application/pdf': ['.pdf'],
     },
-    noClick: true,
+    // noClick: true,
     // maxFiles: 1,
-    multiple: false,
+    // multiple: false,
   });
 
   return (
@@ -71,14 +72,14 @@ const DragNDrop = (props: any) => {
           <div className="flex flex-col items-center">
             <img
               src="/upload-icon.png"
-              style={{ maxWidth: '40%', margin: 'auto' }}
+              style={{ maxWidth: '7em', margin: 'auto', marginTop: '-1em' }}
             />
             {/* <button className="btn btn-blue">
               Choose file(s)
             </button> */}
             <button className="btn btn-primary">Choose file(s)</button>
-            <p className="mt-2 text-center">or drag 'n' drop here</p>
-            <p className="mt-2 text-center">
+            <p className="mt-2 text-center text-sm">or drag 'n' drop here</p>
+            <p className="mt-2 text-center text-sm">
               <em>
                 (Only pdf file will be accepted)
               </em>

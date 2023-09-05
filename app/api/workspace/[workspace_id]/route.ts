@@ -23,7 +23,6 @@ export async function GET( req: Request, { params }: { params: { workspace_id: s
   return NextResponse.json({ success: true, response: files });
 }
 
-
 // type File = Database['public']['Tables']['files']['Row'];
 const getFilesByWorkspace_id = async (workspace_id: string): Promise<string[]> => {
   console.log('workspace_id', workspace_id)
@@ -37,4 +36,22 @@ const getFilesByWorkspace_id = async (workspace_id: string): Promise<string[]> =
 
   var result = files || [];
   return result;
+}
+
+export async function POST(request: NextRequest) {
+  const data = await request.formData()
+  const newFiles: File[] | null = data.get('newFiles') as unknown as File[]
+  console.log('newFiles', newFiles)
+  // if (!file) {
+  //   return NextResponse.json({ success: false })
+  // }
+
+  // const bytes = await file.arrayBuffer()
+  // const buffer = Buffer.from(bytes)
+
+  // const path = `/tmp/${file.name}`
+  // await writeFile(path, buffer)
+  // console.log(`open ${path} to see the uploaded file`)
+
+  return NextResponse.json({ success: true })
 }
