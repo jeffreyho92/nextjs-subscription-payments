@@ -41,17 +41,17 @@ const WorkspaceDetail = (props: { workspace: { workspace_name: string }, files: 
     setLoading(true);
     console.log('arrFile', arrFile)
 
-    const data = new FormData();
+    const formData = new FormData();
     for (let i = 0; i < arrFile.length; i++) {
       if(arrFile[i].new){
-        data.append('newFiles', arrFile[i].file || new Blob, arrFile[i].filename);
+        formData.append('newFiles', arrFile[i].file || new Blob, arrFile[i].filename);
       }
     }
     
     var url = `${getURL()}/api/workspace/${workspace_id}`;
     const response = await fetch(url, {
       method: 'POST',
-      body: data,
+      body: formData,
     });
     if (!response.ok) {
       console.log('response error', response);
